@@ -1,0 +1,110 @@
+@startuml CinemaAbyss_Containers
+!include <C4/C4_Container>
+
+title CinemaAbyss
+
+' ---------- Actors ----------
+Person(user, "User", "Смотрит фильмы, оценивает, оформляет подписку")
+
+' ---------- External Systems ----------
+System_Ext(recsys, "Рекомендательная система")
+System_Ext(payprovider, "Платёжные системы")
+System_Ext(loyalty, "Сервисы лояльности")
+System_Ext(content, "Внешние видеосервисы")
+
+System_Boundary(cinema, "CinemaAbyss") {
+
+    ' ---------- Frontends ----------
+    Container(web, "Web UI", "", "Фронтенд для десктопных браузеров")
+    Container(mobile, "Mobile App", "", "Фронтенд для мобильных устройств (сокращённый набор данных)")
+    Container(tv, "Smart TV App", "", "Фронтенд для телевизоров")
+
+    ' ---------- API Gateways ----------
+    Container(gateway, "API Gateway", "", "Strangler Fig: маршрутизация монолит <-> микросервисы по фиче-флагам, BFF для разных типов UI")
+    ContainerDb(consul, "Consul", "", "Хранилище фиче-флагов")
+
+    ' ---------- Microservices ----------
+    Container(userSvc, "Users Service", "", "Профили, избранное")
+    ContainerDb(userDb, "Users DB")
+
+    Container(moviesSvc, "Movies Service", "", "Метаданные: жанры, актёры, оценки ❕ уже выделен в отдельный сервис ❕")
+    ContainerDb(moviesDb, "Movies DB")
+
+    Container(videoSvc, "Video / Streaming Service", "", "Видеофайлы и выдача потоков")
+    ContainerDb(videoDb, "Video DB")
+
+    Container(subSvc, "Subscriptions Service", "", "Подписки, тарифные планы")
+    ContainerDb(subDb, "Subscriptions DB")
+
+    Container(paySvc, "Payments Service", "", "Платежи")
+    ContainerDb(payDb, "Payments DB")
+
+    Container(promoSvc, "Promotions Service", "", "Скидки, промокоды")
+    ContainerDb(promoDb, "Promotions DB")
+
+    Container(recoAdapter, "Recommendations Service", "", "Anti-Corruption Layer к внешней рекомендательной системе")
+    ContainerDb(cache, "Cache", "", "Подборки")
+
+    Container(notifySvc, "Notification Service", "", "Отправка уведомлений пользователям")
+
+    ' ---------- Message Brokers ----------
+    ContainerQueue(bus, "Message Broker", "Kafka", "Асинхронная интеграция между сервисами")
+
+    ' ---------- Legacy ----------
+    Container(monolith, "Monolith", "", "Постепенно замещается микросервисами (Strangler Fig)")
+    ContainerDb(monoDb, "Monolith DB", "", "Единая БД монолита")
+}
+
+' ---------- Frontends ----------
+Rel(user, web, "")
+Rel(user, mobile, "")
+Rel(user, tv, "")
+
+Rel(web, gateway, "")
+Rel(mobile, gateway, "")
+Rel(tv, gateway, "")
+
+' ---------- API Gateway ----------
+Rel(gateway, consul, "")
+Rel(gateway, userSvc, "")
+Rel(gateway, moviesSvc, "")
+Rel(gateway, videoSvc, "")
+Rel(gateway, subSvc, "")
+Rel(gateway, paySvc, "")
+Rel(gateway, promoSvc, "")
+Rel(gateway, recoAdapter, "")
+Rel(gateway, monolith, "")
+
+' ---------- Database per Service ----------
+Rel(userSvc, userDb, "")
+Rel(moviesSvc, moviesDb, "")
+Rel(videoSvc, videoDb, "")
+Rel(subSvc, subDb, "")
+Rel(paySvc, payDb, "")
+Rel(promoSvc, promoDb, "")
+Rel(monolith, monoDb, "")
+Rel(recoAdapter, cache, "")
+Rel(userSvc, cache, "")
+
+' ---------- Asynchronous Integration ----------
+Rel(userSvc, bus, "")
+Rel(paySvc, bus, "")
+Rel(subSvc, bus, "")
+Rel(moviesSvc, bus, "")
+Rel(bus, subSvc, "")
+Rel(bus, notifySvc, "")
+Rel(bus, recoAdapter, "")
+Rel(bus, promoSvc, "")
+
+' ---------- Synchronous Inter-service Calls ----------
+Rel(subSvc, promoSvc, "REST API: проверка промокодов")
+Rel(paySvc, subSvc, "REST API: проверка подписки")
+Rel(videoSvc, subSvc, "REST API: проверка доступа к видео")
+
+' ---------- External Systems ----------
+Rel(paySvc, payprovider, "Оплата\Возвраты")
+Rel(promoSvc, loyalty, "Промокоды, скидки, акции")
+Rel(videoSvc, content, "Получение видеоконтента")
+Rel(recoAdapter, recsys, "Получение подборок")
+
+@enduml
