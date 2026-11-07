@@ -3,6 +3,7 @@
 
 # Node.json
 node_modules
+tests/postman/reports
 
 ### Helm ###
 # Chart dependencies

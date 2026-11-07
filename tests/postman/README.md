@@ -55,7 +55,7 @@ npm install
 # Run all tests against the local environment (default)
 npm test
 
-# Run all tests against the Docker environment
+# Run all tests inside the Docker environment
 npm run test:docker
 ```
 
@@ -84,6 +84,7 @@ node run-tests.js --environment <env> --folder <folder> --reporters <reporters> 
 ```
 
 Options:
+
 - `--environment`, `-e`: Environment to run tests against (default: 'local')
 - `--collection`, `-c`: Collection to run (default: 'CinemaAbyss')
 - `--folder`, `-f`: Specific folder in the collection to run
@@ -92,6 +93,7 @@ Options:
 - `--timeout`, `-t`: Request timeout in ms (default: 10000)
 
 Example:
+
 ```bash
 node run-tests.js --environment docker --folder "Movies Microservice" --reporters cli,htmlextra --bail
 ```
