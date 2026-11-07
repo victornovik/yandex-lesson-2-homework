@@ -12,32 +12,33 @@
 
 ### 1. Proxy
 
-Реализовал и отладил сервис на C# .NET Core 10.0 в `./src/microservices/proxy`.
+Реализовал и отладил сервис `proxy` на C# .NET Core 10.0 в `./src/microservices/proxy`.
 
 1. Протестировал переключение траффика вручную через коллекцию Postman и через `curl http://localhost:8000/api/movies` - всё работает.
 2. Добился прохождения всех Postman тестов через `npm test`, кроме events.
 3. Протестировал распределение траффика, меняя переменную окружения MOVIES_MIGRATION_PERCENT в файле `docker-compose.yml`.
 
-![](./tests/Test%20Report.jpg)
+#### Скриншот тестов
 
-❕ Для того, чтобы весь кластер заработал я вынужден был поправить
-
-- movies/Dockerfile (закомментировал RUN apk --no-cache add ca-certificates)
-- monolith/Dockerfile (RUN apk --no-cache add ca-certificates)
-- docker-compose.yml (postgres: condition: service_healthy)
+![](./tests/Proxy-TestReport.jpg)
 
 ### 2. Kafka
 
-Вам как архитектуру нужно также проверить гипотезу насколько просто реализовать применение Kafka в данной архитектуре.
+Реализовал и отладил сервис `events` на C# .NET Core 10.0 в `./src/microservices/events`.
 
-Для этого нужно сделать MVP сервис events, который будет при вызове API создавать и сам же читать сообщения в топике Kafka.
+1. Добился прохождения всех Postman тестов через `npm test`.
 
-    - Разработайте сервис на любом языке программирования с consumer'ами и producer'ами.
-    - Реализуйте простой API, при вызове которого будут создаваться события User/Payment/Movie и обрабатываться внутри сервиса с записью в лог
-    - Добавьте в docker-compose новый сервис, kafka там уже есть
+#### Скриншот тестов
 
-Необходимые тесты для проверки этого API вызываются при запуске npm run test:local из папки tests/postman
-Приложите скриншот тестов и скриншот состояния топиков Kafka из UI http://localhost:8090
+![](./tests/Events-TestReport.jpg)
+
+#### Скриншот состояния топиков Kafka из UI `http://localhost:8090`
+
+![](./tests/Events-Topic-all.jpg)
+
+#### Содержимое топика `movie-events` из UI `http://localhost:8090`
+
+![](./tests/Events-Topic-movie-events.jpg)
 
 # Задание 3
 
