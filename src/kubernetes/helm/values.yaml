@@ -5,7 +5,7 @@ global:
 
 # Image pull secrets
 imagePullSecrets:
-  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6
+  dockerconfigjson: ewogICJhdXRocyI6IHsKICAgICJnaGNyLmlvIjogewogICAgICAiYXV0aCI6ICJkbWxqZEc5eWJtOTJhV3M2WjJod1gxZHVURVZVVW1WeGVHUmllRlJIT1VkM2NucHdTVEpTTlVkS1ZGcDBWakUzYldaWlVRPT0iCiAgICB9LAogICAgImh0dHBzOi8vaW5kZXguZG9ja2VyLmlvL3YxLyI6IHt9LAogICAgImh0dHBzOi8vaW5kZXguZG9ja2VyLmlvL3YxL2FjY2Vzcy10b2tlbiI6IHt9LAogICAgImh0dHBzOi8vaW5kZXguZG9ja2VyLmlvL3YxL3JlZnJlc2gtdG9rZW4iOiB7fQogIH0sCiAgImNyZWRzU3RvcmUiOiAiZGVza3RvcCIsCiAgImN1cnJlbnRDb250ZXh0IjogImRlc2t0b3AtbGludXgiLAogICJwbHVnaW5zIjogewogICAgIi14LWNsaS1oaW50cyI6IHsKICAgICAgImVuYWJsZWQiOiAidHJ1ZSIKICAgIH0sCiAgICAiYWkiOiB7CiAgICAgICJob29rcyI6ICJidWlsZCxidWlsZHggYnVpbGQscnVuLGNvbXBvc2UiCiAgICB9LAogICAgImNvbXBvc2UiOiB7CiAgICAgICJob29rcyI6ICJsb2dzLGNvbXBvc2UgbG9ncyxjb21wb3NlIGF0dGFjaCxjb21wb3NlIHVwIgogICAgfSwKICAgICJkZWJ1ZyI6IHsKICAgICAgImhvb2tzIjogImV4ZWMiCiAgICB9CiAgfSwKICAiZmVhdHVyZXMiOiB7CiAgICAiaG9va3MiOiAidHJ1ZSIKICB9Cn0K
 # Database configuration
 database:
   host: postgres
@@ -33,7 +33,7 @@ database:
 monolith:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/monolith
+    repository: ghcr.io/victornovik/yandex-lesson-2-homework/monolith
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -53,7 +53,7 @@ monolith:
 proxyService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/proxy-service
+    repository: ghcr.io/victornovik/yandex-lesson-2-homework/proxy-service
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -73,7 +73,7 @@ proxyService:
 moviesService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/movies-service
+    repository: ghcr.io/victornovik/yandex-lesson-2-homework/movies-service
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -93,7 +93,7 @@ moviesService:
 eventsService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/events-service
+    repository: ghcr.io/victornovik/yandex-lesson-2-homework/events-service
     tag: latest
     pullPolicy: Always
   replicas: 1

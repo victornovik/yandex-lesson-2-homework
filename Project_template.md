@@ -303,14 +303,16 @@ proxyService:
     type: ClusterIP
 ```
 
-- Вместо ghcr.io/db-exp/cinemaabysstest/proxy-service напишите свой путь до образа для всех сервисов
+- Вместо `ghcr.io/db-exp/cinemaabysstest` напишите свой путь `ghcr.io/victornovik/yandex-lesson-2-homework/`
+
 - для imagePullSecret проставьте свое значение (скопируйте из конфигурации kubernetes)
   ```yaml
   imagePullSecrets:
-    dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6ICJaR0l0Wlhod09tZG9jRjl2UTJocVZIa3dhMWhKVDIxWmFVZHJOV2hRUW10aFVXbFZSbTVaTjJRMFNYUjRZMWM9IgoJCX0KCX0sCgkiY3JlZHNTdG9yZSI6ICJkZXNrdG9wIiwKCSJjdXJyZW50Q29udGV4dCI6ICJkZXNrdG9wLWxpbnV4IiwKCSJwbHVnaW5zIjogewoJCSIteC1jbGktaGludHMiOiB7CgkJCSJlbmFibGVkIjogInRydWUiCgkJfQoJfSwKCSJmZWF0dXJlcyI6IHsKCQkiaG9va3MiOiAidHJ1ZSIKCX0KfQ==
+    dockerconfigjson: ewogICJhdXRocyI6IHsKICAgICJnaGNyLmlvIjogewogICAgICAiYXV0aCI6ICJkbWxqZEc5eWJtOTJhV3M2WjJod1gxZHVURVZVVW1WeGVHUmllRlJIT1VkM2NucHdTVEpTTlVkS1ZGcDBWakUzYldaWlVRPT0iCiAgICB9LAogICAgImh0dHBzOi8vaW5kZXguZG9ja2VyLmlvL3YxLyI6IHt9LAogICAgImh0dHBzOi8vaW5kZXguZG9ja2VyLmlvL3YxL2FjY2Vzcy10b2tlbiI6IHt9LAogICAgImh0dHBzOi8vaW5kZXguZG9ja2VyLmlvL3YxL3JlZnJlc2gtdG9rZW4iOiB7fQogIH0sCiAgImNyZWRzU3RvcmUiOiAiZGVza3RvcCIsCiAgImN1cnJlbnRDb250ZXh0IjogImRlc2t0b3AtbGludXgiLAogICJwbHVnaW5zIjogewogICAgIi14LWNsaS1oaW50cyI6IHsKICAgICAgImVuYWJsZWQiOiAidHJ1ZSIKICAgIH0sCiAgICAiYWkiOiB7CiAgICAgICJob29rcyI6ICJidWlsZCxidWlsZHggYnVpbGQscnVuLGNvbXBvc2UiCiAgICB9LAogICAgImNvbXBvc2UiOiB7CiAgICAgICJob29rcyI6ICJsb2dzLGNvbXBvc2UgbG9ncyxjb21wb3NlIGF0dGFjaCxjb21wb3NlIHVwIgogICAgfSwKICAgICJkZWJ1ZyI6IHsKICAgICAgImhvb2tzIjogImV4ZWMiCiAgICB9CiAgfSwKICAiZmVhdHVyZXMiOiB7CiAgICAiaG9va3MiOiAidHJ1ZSIKICB9Cn0KWxpbnV4IiwKCSJwbHVnaW5zIjogewoJCSIteC1jbGktaGludHMiOiB7CgkJCSJlbmFibGVkIjogInRydWUiCgkJfQoJfSwKCSJmZWF0dXJlcyI6IHsKCQkiaG9va3MiOiAidHJ1ZSIKCX0KfQ==
   ```
 
-2. В папке ./templates/services заполните шаблоны для proxy-service.yaml и events-service.yaml (опирайтесь на свою kubernetes конфигурацию - смысл helm'а сделать шаблоны для быстрого обновления и установки)
+2. В папке ./templates/services заполните шаблоны для proxy-service.yaml и events-service.yaml
+   (опирайтесь на свою kubernetes конфигурацию - смысл helm'а сделать шаблоны для быстрого обновления и установки)
 
 ```yaml
 template:
@@ -329,29 +331,24 @@ kubectl delete all --all -n cinemaabyss
 kubectl delete  namespace cinemaabyss
 ```
 
-Запустите
+Запустите деплой через helm charts
 
 ```bash
 helm install cinemaabyss .\src\kubernetes\helm --namespace cinemaabyss --create-namespace
 ```
 
-Если в процессе будет ошибка
-
-```code
-[2025-04-08 21:43:38,780] ERROR Fatal error during KafkaServer startup. Prepare to shutdown (kafka.server.KafkaServer)
-kafka.common.InconsistentClusterIdException: The Cluster ID OkOjGPrdRimp8nkFohYkCw doesn't match stored clusterId Some(sbkcoiSiQV2h_mQpwy05zQ) in meta.properties. The broker is trying to join the wrong cluster. Configured zookeeper.connect may be wrong.
-```
-
-Проверьте развертывание:
+Проверьте развертывание. Все поды должны быть **Running**
 
 ```bash
 kubectl get pods -n cinemaabyss
 minikube tunnel
 ```
 
-Потом вызовите
-https://cinemaabyss.example.com/api/movies
-и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
+Скриншот развертывания helm
+![](tests/helm-cluster-deploy.jpg)
+
+Скриншот вывода https://cinemaabyss.example.com/api/movies
+![](tests/helm-api-movies.jpg)
 
 ## Удаляем все
 
