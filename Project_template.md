@@ -50,48 +50,8 @@
 
 ### CI/CD
 
-В папке .github/worflows доработайте деплой новых сервисов proxy и events в docker-build-push.yml , чтобы api-tests при сборке отрабатывали корректно при отправке коммита в ваш репозиторий.
-
-Нужно доработать
-
-```yaml
-on:
-  push:
-    branches: [main]
-    paths:
-      - "src/**"
-      - ".github/workflows/docker-build-push.yml"
-  release:
-    types: [published]
-```
-
-и добавить необходимые шаги в блок
-
-```yaml
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-```
-
-Как только сборка отработает и в github registry появятся ваши образы, можно переходить к блоку настройки Kubernetes
-Успешным результатом данного шага является "зеленая" сборка и "зеленые" тесты
+- В папке .github/worflows доработал деплой новых сервисов proxy и events в docker-build-push.yml, чтобы api-tests при сборке отрабатывали корректно при отправке коммита.
+- Добился "зеленой" сборка и "зеленых" тестов.
 
 ### Proxy в Kubernetes
 
@@ -99,7 +59,7 @@ jobs:
 
 Для деплоя в kubernetes необходимо залогиниться в docker registry Github'а.
 
-1. Создайте Personal Access Token (PAT) https://github.com/settings/tokens . Создавайте class с правом read:packages
+1. Создал Personal Access Token (PAT) https://github.com/settings/tokens с правом read:packages
 2. В src/kubernetes/\*.yaml (event-service, monolith, movies-service и proxy-service) отредактируйте путь до ваших образов
 
 ```bash
@@ -144,7 +104,7 @@ jobs:
 После заполнения config.json, также прогоните содержимое через base64
 
 ```bash
-cat .docker/config.json | base64
+cat ~/.docker/config.json | base64
 ```
 
 и полученное значение добавляем в
