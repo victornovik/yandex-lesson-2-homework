@@ -59,8 +59,9 @@
 
 Для деплоя в kubernetes необходимо залогиниться в docker registry Github'а.
 
-1. Создал Personal Access Token (PAT) https://github.com/settings/tokens с правом read:packages
-2. В src/kubernetes/\*.yaml (event-service, monolith, movies-service и proxy-service) отредактируйте путь до ваших образов
+Создайте Personal Access Token (PAT) https://github.com/settings/tokens с правом read:packages
+
+В src/kubernetes/\*.yaml (event-service, monolith, movies-service и proxy-service) отредактируйте путь до ваших образов
 
 ```bash
  spec:
@@ -69,13 +70,13 @@
         image: ghcr.io/ваш логин/имя репозитория/events-service:latest
 ```
 
-3. Добавьте в секрет src/kubernetes/dockerconfigsecret.yaml в поле
+Добавьте в секрет src/kubernetes/dockerconfigsecret.yaml в поле
 
 ```bash
  .dockerconfigjson: значение в base64 файла ~/.docker/config.json
 ```
 
-4. Если в ~/.docker/config.json нет значения для аутентификации
+Если в ~/.docker/config.json нет значения для аутентификации
 
 ```json
 {
@@ -87,12 +88,14 @@
 }
 ```
 
-то выполните
-
-и добавьте
+то добавьте
 
 ```json
- "auth": "имя пользователя:токен в base64"
+"auths": {
+                "ghcr.io": {
+                       "auth": "имя пользователя:токен в base64"
+                }
+        }
 ```
 
 Чтобы получить значение в base64 можно выполнить команду
@@ -121,13 +124,21 @@ cat ~/.docker/config.json | base64
 - Доработайте ingress.yaml, чтобы можно было с помощью тестов проверить создание событий
 - Выполните дальшейшие шаги для поднятия кластера:
 
-1. Создайте namespace:
+Создайте кластер
+
+```bash
+minikube start --driver=docker
+```
+
+Проверьте `kubectl get nodes`. Нода должна иметь STATUS `Ready`
+
+Создайте namespace:
 
 ```bash
 kubectl apply -f src/kubernetes/namespace.yaml
 ```
 
-2. Создайте секреты и переменные
+Создайте секреты и переменные
 
 ```bash
 kubectl apply -f src/kubernetes/configmap.yaml
@@ -136,61 +147,57 @@ kubectl apply -f src/kubernetes/dockerconfigsecret.yaml
 kubectl apply -f src/kubernetes/postgres-init-configmap.yaml
 ```
 
-3. Разверните базу данных:
+Разверните базу данных:
 
 ```bash
 kubectl apply -f src/kubernetes/postgres.yaml
+kubectl -n cinemaabyss get pod          # ждём когда postgres-0 перейдет в STATUS `Running`
 ```
 
-На этом этапе если вызвать команду
-
-```bash
-kubectl -n cinemaabyss get pod
-```
-
-Вы увидите
-
-NAME READY STATUS  
- postgres-0 1/1 Running
-
-4. Разверните Kafka:
+Разверните Kafka (вместе с Zookeeper)
 
 ```bash
 kubectl apply -f src/kubernetes/kafka/kafka.yaml
 ```
 
-Проверьте, теперь должно быть запущено 3 пода, если что-то не так, то посмотрите логи
+Проверьте с помощью `kubectl -n cinemaabyss get pod`, теперь должно быть запущено 3 пода.
+
+- kafka-0
+- postgres-0
+- zookeeper-0
+
+Если не так, то посмотрите логи
 
 ```bash
 kubectl -n cinemaabyss logs имя_пода (например - kafka-0)
 ```
 
-5. Разверните монолит:
+Разверните монолит:
 
 ```bash
 kubectl apply -f src/kubernetes/monolith.yaml
 ```
 
-6. Разверните микросервисы:
+Разверните микросервисы:
 
 ```bash
 kubectl apply -f src/kubernetes/movies-service.yaml
 kubectl apply -f src/kubernetes/events-service.yaml
 ```
 
-7. Разверните прокси-сервис:
+Разверните прокси-сервис:
 
 ```bash
 kubectl apply -f src/kubernetes/proxy-service.yaml
 ```
 
-После запуска и поднятия подов вывод команды
+Посмотрите статус всех подов
 
 ```bash
 kubectl -n cinemaabyss get pod
 ```
 
-Будет наподобие такого
+все поды должны быть **Running**
 
 ```bash
   NAME                              READY   STATUS
@@ -210,35 +217,47 @@ kubectl -n cinemaabyss get pod
   zookeeper-0                       1/1     Running
 ```
 
-8. Добавим ingress
+Добавим Ingress
 
-- добавьте аддон
+- Добавьте аддон Ingress
 
 ```bash
 minikube addons enable ingress
-```
-
-```bash
 kubectl apply -f src/kubernetes/ingress.yaml
 ```
 
-9. Добавьте в /etc/hosts
-   127.0.0.1 cinemaabyss.example.com
+Если ingress.yaml отклонён с ошибкой, подождите минуту, пока поднимется ingress-контроллер.
+Проверьте статус Ingress:
 
-10. Вызовите
+```bash
+kubectl -n ingress-nginx get pod
+```
+
+Добавьте **под Админом** в C:\Windows\System32\drivers\etc\hosts
+
+```bash
+127.0.0.1 cinemaabyss.example.com
+```
+
+В отдельном окне **под Админом** запустите
 
 ```bash
 minikube tunnel
 ```
 
-11. Вызовите https://cinemaabyss.example.com/api/movies
-    Вы должны увидеть вывод списка фильмов
-    Можно поэкспериментировать со значением MOVIES_MIGRATION_PERCENT в src/kubernetes/configmap.yaml и убедится, что вызовы movies уходят полностью в новый сервис
-
-12. Запустите тесты из папки tests/postman
+Вызовите https://cinemaabyss.example.com/api/movies или
 
 ```bash
- npm run test:kubernetes
+curl --noproxy '*' http://cinemaabyss.example.com/api/movies
+```
+
+Вы должны увидеть вывод списка фильмов.
+Можно поэкспериментировать со значением MOVIES_MIGRATION_PERCENT в src/kubernetes/configmap.yaml и убедиться, что вызовы movies уходят полностью в новый сервис
+
+Запустите тесты из папки tests/postman
+
+```bash
+npm run test:kubernetes
 ```
 
 Часть тестов с health-чек упадет, но создание событий отработает.
@@ -246,11 +265,17 @@ minikube tunnel
 
 #### Шаг 3
 
-Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и скриншот вывода event-service после вызова тестов.
+Скриншот вызова https://cinemaabyss.example.com/api/movies
+
+![](tests/k8s-api-movies.jpg)
+
+Скриншот вывода event-service после вызова тестов
+
+![](tests/k8s-events-tests.jpg)
 
 # Задание 4
 
-Для простоты дальнейшего обновления и развертывания вам как архитектуру необходимо так же реализовать helm-чарты для прокси-сервиса и проверить работу
+Для простоты дальнейшего обновления и развертывания вам как архитектору необходимо так же реализовать helm-чарты для прокси-сервиса и проверить работу
 
 Для этого:
 
