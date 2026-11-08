@@ -3,7 +3,7 @@ name: Docker Build and Push
 on:
   workflow_dispatch: # lets you run it manually
   push:
-    branches: [main]
+    branches: [main, cinema]
     paths:
       - "src/**"
       - ".github/workflows/docker-build-push.yml"
@@ -58,8 +58,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-monolith.outputs.tags }}
           labels: ${{ steps.meta-monolith.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=monolith
+          cache-to: type=gha,scope=monolith,mode=max
 
       ### Movies Service
       - name: Extract metadata (tags, labels) for Movies Service
@@ -81,8 +81,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-movies.outputs.tags }}
           labels: ${{ steps.meta-movies.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=movies
+          cache-to: type=gha,scope=movies,mode=max
 
       ### Events Service
       - name: Extract metadata (tags, labels) for Events Service
@@ -104,8 +104,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-events.outputs.tags }}
           labels: ${{ steps.meta-events.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=events
+          cache-to: type=gha,scope=events,mode=max
 
       ### Proxy Service
       - name: Extract metadata (tags, labels) for Proxy Service
@@ -127,5 +127,5 @@ jobs:
           push: true
           tags: ${{ steps.meta-proxy.outputs.tags }}
           labels: ${{ steps.meta-proxy.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=proxy
+          cache-to: type=gha,scope=proxy,mode=max
